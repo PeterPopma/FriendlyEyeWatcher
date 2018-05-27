@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -33,6 +34,8 @@ namespace FriendlyEyeWatcher.Forms
         int currentFrameNumber;
         string numVotesYes;
         string numVotesNo;
+        string filename;
+        bool obtainImageRecognition;
 
         Bitmap[] imageFrame = new Bitmap[10];
 
@@ -133,6 +136,23 @@ namespace FriendlyEyeWatcher.Forms
 
         private void OnTimedEventUpdateScreen(object sender, EventArgs eArgs)
         {
+            if (obtainImageRecognition)
+            {
+                obtainImageRecognition = false;
+                Refresh();
+
+                // Upload the first file through FTP
+                using (WebClient client = new WebClient())
+                {
+                    client.Credentials = new NetworkCredential("u16882p12377", "Boarnsyl3");
+                    client.UploadFile("ftp://ftp.gravityone.nl/domains/gravityone.nl/public_html/uploads/" + filename, "STOR", "C:\\SavedImages\\" + filename);
+                }
+
+                // Analyse image through KPN
+                string hints = new KPNClient().AnalyzeImage("http://www.gravityone.nl/uploads/" + filename);
+                hints = SplitToLines(hints, new char[] { ' ' }, 60);
+                outlineLabelHints.Text = "Hints: " + hints;
+            }
             if (numFrames>0 || pendingRequest)
             {
                 return;
@@ -183,13 +203,13 @@ namespace FriendlyEyeWatcher.Forms
                         numFrames = Convert.ToInt32(match.Value);
                     }
                     // Look for hints
-                    re = new Regex(@"(?<=hints\=\\\"")(.*?)(?=\\\"")");
+/*                    re = new Regex(@"(?<=hints\=\\\"")(.*?)(?=\\\"")");
                     match = re.Match(responseString);
                     if (match.Success)
                     {
                         string hints = SplitToLines(match.Value, new char[]{' '}, 60);
                         outlineLabelHints.Text = "Hints: " + hints;
-                    }
+                    }*/
                     // Look for purpose
                     re = new Regex(@"(?<=purpose\=\\\"")(.*?)(?=\\\"")");
                     match = re.Match(responseString);
@@ -197,9 +217,20 @@ namespace FriendlyEyeWatcher.Forms
                     {
                         outlineLabelPurpose.Text = "Danger-level: " + match.Value;
                     }
+
+                    // Look for filename
+                    re = new Regex(@"(?<=filename\=\\\"")(.*?)(?=\\\"")");
+                    match = re.Match(responseString);
+                    if (match.Success)
+                    {
+                        filename = match.Value;
+                    }
+
                     currentFrameNumber = 1;
                     labelCurrentFrameNumber.Text = currentFrameNumber.ToString();
                     UpdateImage();
+
+                    obtainImageRecognition = true;     // on next round 
                 }
             }
             pendingRequest = false;
