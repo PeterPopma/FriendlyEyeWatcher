@@ -31,6 +31,8 @@ namespace FriendlyEyeWatcher.Forms
         string reviewerID;
         int numFrames;
         int currentFrameNumber;
+        string numVotesYes;
+        string numVotesNo;
 
         Bitmap[] imageFrame = new Bitmap[10];
 
@@ -42,6 +44,20 @@ namespace FriendlyEyeWatcher.Forms
             outlineLabelStatus.BackColor = Color.Transparent;
             outlineLabelStatus.Text = "Cannot connect to server!";
             outlineLabelStatus.ForeColor = Color.OrangeRed;
+            outlineLabelHints.Parent = pictureBoxImage;
+            outlineLabelHints.BackColor = Color.Transparent;
+            outlineLabelHints.Text = "";
+//            outlineLabelHints.MaximumSize = new Size(1500, 0);
+//            outlineLabelHints.AutoSize = true;
+            outlineLabelReal.Parent = pictureBoxImage;
+            outlineLabelReal.BackColor = Color.Transparent;
+            outlineLabelReal.Visible = false;
+            buttonYes.Parent = pictureBoxImage;
+            buttonYes.BackColor = Color.Transparent;
+            buttonNo.Parent = pictureBoxImage;
+            buttonNo.BackColor = Color.Transparent;
+            outlineLabelPurpose.Parent = pictureBoxImage;
+            outlineLabelPurpose.BackColor = Color.Transparent;
             UpdateButtons(false);
 
             reviewerID = new Random().Next(100000, 999999).ToString();
@@ -58,9 +74,12 @@ namespace FriendlyEyeWatcher.Forms
 
         void UpdateButtons(bool show)
         {
-            buttonSave.Visible = show;
-            buttonDangerous.Visible = show;
+            buttonYes.Visible = show;
+            buttonNo.Visible = show;
             panelNavigation.Visible = show;
+            outlineLabelReal.Visible = show;
+            outlineLabelPurpose.Visible = show;
+            outlineLabelHints.Visible = show;
         }
 
         void ResetFrames()
@@ -71,7 +90,9 @@ namespace FriendlyEyeWatcher.Forms
             }
             pictureBoxImage.Image = null;
             numFrames = 0;
+            outlineLabelHints.Text = "";
             UpdateButtons(false);
+            outlineLabelReal.Visible = false;
         }
 
         private void SetupTimer()
@@ -81,6 +102,33 @@ namespace FriendlyEyeWatcher.Forms
             updateScreenTimer.Interval = 80;
             updateScreenTimer.Tick += new EventHandler(OnTimedEventUpdateScreen);
             updateScreenTimer.Start();
+        }
+
+        public static string SplitToLines(string text, char[] splitOnCharacters, int maxStringLength)
+        {
+            var sb = new StringBuilder();
+            var index = 0;
+
+            while (text.Length > index)
+            {
+                // start a new line, unless we've just started
+                if (index != 0)
+                    sb.AppendLine();
+
+                // get the next substring, else the rest of the string if remainder is shorter than `maxStringLength`
+                var splitAt = index + maxStringLength <= text.Length
+                    ? text.Substring(index, maxStringLength).LastIndexOfAny(splitOnCharacters)
+                    : text.Length - index;
+
+                // if can't find split location, take `maxStringLength` characters
+                splitAt = (splitAt == -1) ? maxStringLength : splitAt;
+
+                // add result to collection & increment index
+                sb.Append(text.Substring(index, splitAt).Trim());
+                index += splitAt;
+            }
+
+            return sb.ToString();
         }
 
         private void OnTimedEventUpdateScreen(object sender, EventArgs eArgs)
@@ -133,6 +181,21 @@ namespace FriendlyEyeWatcher.Forms
                     if (match.Success)
                     {
                         numFrames = Convert.ToInt32(match.Value);
+                    }
+                    // Look for hints
+                    re = new Regex(@"(?<=hints\=\\\"")(.*?)(?=\\\"")");
+                    match = re.Match(responseString);
+                    if (match.Success)
+                    {
+                        string hints = SplitToLines(match.Value, new char[]{' '}, 60);
+                        outlineLabelHints.Text = "Hints: " + hints;
+                    }
+                    // Look for purpose
+                    re = new Regex(@"(?<=purpose\=\\\"")(.*?)(?=\\\"")");
+                    match = re.Match(responseString);
+                    if (match.Success)
+                    {
+                        outlineLabelPurpose.Text = "Danger-level: " + match.Value;
                     }
                     currentFrameNumber = 1;
                     labelCurrentFrameNumber.Text = currentFrameNumber.ToString();
@@ -213,5 +276,60 @@ namespace FriendlyEyeWatcher.Forms
             UpdateImage();
         }
 
+        private void buttonYes_Click(object sender, EventArgs e)
+        {
+            Vote(true);
+            FormOverview formOverview = new FormOverview();
+            formOverview.outlineLabelVotesYes.Text = "people voted YES: " + numVotesYes;
+            formOverview.outlineLabelVotesNo.Text = "people voted NO: " + numVotesNo;
+            formOverview.Show();
+            ResetFrames();
+        }
+
+        private void buttonNo_Click(object sender, EventArgs e)
+        {
+            Vote(false);
+            FormOverview formOverview = new FormOverview();
+            formOverview.outlineLabelVotesYes.Text = "people voted YES: " + numVotesYes;
+            formOverview.outlineLabelVotesNo.Text = "people voted NO: " + numVotesNo;
+            formOverview.Show();
+            ResetFrames();
+        }
+
+        private void Vote(bool yes)
+        {
+            HttpResponseMessage response = null;
+            try
+            {
+                string request = String.Format("review?id={0}&reviewerid={1}&value={2}", imageSetID, reviewerID, yes ? 1 : 0);
+                response = client.PostAsync(request, null).GetAwaiter().GetResult();
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseString = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    // Look for yes votes
+                    Regex re = new Regex(@"(?<=yes_votes\=\\\"")(.*?)(?=\\\"")");
+                    Match match = re.Match(responseString);
+                    if (match.Success)
+                    {
+                        numVotesYes = match.Value;
+                    }
+                    // Look for no votes
+                    re = new Regex(@"(?<=no_votes\=\\\"")(.*?)(?=\\\"")");
+                    match = re.Match(responseString);
+                    if (match.Success)
+                    {
+                        numVotesNo = match.Value;
+                    }
+                }
+            }
+            catch (HttpRequestException)
+            {
+                outlineLabelStatus.Text = "Cannot connect to server!";
+                outlineLabelStatus.ForeColor = Color.OrangeRed;
+                pendingRequest = false;
+                ResetFrames();
+                return;
+            }
+        }
     }
 }
