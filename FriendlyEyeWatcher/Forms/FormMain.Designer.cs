@@ -36,10 +36,12 @@
             this.buttonPrevious = new System.Windows.Forms.Button();
             this.buttonYes = new System.Windows.Forms.Button();
             this.buttonNo = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.outlineLabelDeliveryTimes = new FriendlyEyeWatcher.CustomControls.OutlineLabel();
+            this.outlineLabelPurpose = new FriendlyEyeWatcher.CustomControls.OutlineLabel();
             this.outlineLabelReal = new FriendlyEyeWatcher.CustomControls.OutlineLabel();
             this.outlineLabelHints = new FriendlyEyeWatcher.CustomControls.OutlineLabel();
             this.outlineLabelStatus = new FriendlyEyeWatcher.CustomControls.OutlineLabel();
-            this.outlineLabelPurpose = new FriendlyEyeWatcher.CustomControls.OutlineLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).BeginInit();
             this.panelNavigation.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -143,6 +145,41 @@
             this.buttonNo.UseVisualStyleBackColor = false;
             this.buttonNo.Click += new System.EventHandler(this.buttonNo_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(684, 368);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(325, 268);
+            this.button1.TabIndex = 11;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // outlineLabelDeliveryTimes
+            // 
+            this.outlineLabelDeliveryTimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 28F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.outlineLabelDeliveryTimes.ForeColor = System.Drawing.Color.Violet;
+            this.outlineLabelDeliveryTimes.Location = new System.Drawing.Point(59, 263);
+            this.outlineLabelDeliveryTimes.Name = "outlineLabelDeliveryTimes";
+            this.outlineLabelDeliveryTimes.OutlineForeColor = System.Drawing.Color.Black;
+            this.outlineLabelDeliveryTimes.OutlineWidth = 2F;
+            this.outlineLabelDeliveryTimes.Size = new System.Drawing.Size(1808, 134);
+            this.outlineLabelDeliveryTimes.TabIndex = 12;
+            this.outlineLabelDeliveryTimes.Text = "times";
+            // 
+            // outlineLabelPurpose
+            // 
+            this.outlineLabelPurpose.AutoSize = true;
+            this.outlineLabelPurpose.Font = new System.Drawing.Font("Microsoft Sans Serif", 42F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.outlineLabelPurpose.ForeColor = System.Drawing.Color.White;
+            this.outlineLabelPurpose.Location = new System.Drawing.Point(59, 176);
+            this.outlineLabelPurpose.Name = "outlineLabelPurpose";
+            this.outlineLabelPurpose.OutlineForeColor = System.Drawing.Color.Black;
+            this.outlineLabelPurpose.OutlineWidth = 2F;
+            this.outlineLabelPurpose.Size = new System.Drawing.Size(267, 64);
+            this.outlineLabelPurpose.TabIndex = 10;
+            this.outlineLabelPurpose.Text = "Purpose: ";
+            // 
             // outlineLabelReal
             // 
             this.outlineLabelReal.AutoSize = true;
@@ -160,7 +197,7 @@
             // 
             this.outlineLabelHints.Font = new System.Drawing.Font("Microsoft Sans Serif", 42F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.outlineLabelHints.ForeColor = System.Drawing.Color.LawnGreen;
-            this.outlineLabelHints.Location = new System.Drawing.Point(59, 276);
+            this.outlineLabelHints.Location = new System.Drawing.Point(59, 389);
             this.outlineLabelHints.Name = "outlineLabelHints";
             this.outlineLabelHints.OutlineForeColor = System.Drawing.Color.Black;
             this.outlineLabelHints.OutlineWidth = 2F;
@@ -181,25 +218,14 @@
             this.outlineLabelStatus.TabIndex = 6;
             this.outlineLabelStatus.Text = "Everything safe for now..";
             // 
-            // outlineLabelPurpose
-            // 
-            this.outlineLabelPurpose.AutoSize = true;
-            this.outlineLabelPurpose.Font = new System.Drawing.Font("Microsoft Sans Serif", 42F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.outlineLabelPurpose.ForeColor = System.Drawing.Color.White;
-            this.outlineLabelPurpose.Location = new System.Drawing.Point(59, 176);
-            this.outlineLabelPurpose.Name = "outlineLabelPurpose";
-            this.outlineLabelPurpose.OutlineForeColor = System.Drawing.Color.Black;
-            this.outlineLabelPurpose.OutlineWidth = 2F;
-            this.outlineLabelPurpose.Size = new System.Drawing.Size(267, 64);
-            this.outlineLabelPurpose.TabIndex = 10;
-            this.outlineLabelPurpose.Text = "Purpose: ";
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(1904, 1041);
+            this.Controls.Add(this.outlineLabelDeliveryTimes);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.outlineLabelPurpose);
             this.Controls.Add(this.outlineLabelReal);
             this.Controls.Add(this.outlineLabelHints);
@@ -231,5 +257,7 @@
         private CustomControls.OutlineLabel outlineLabelHints;
         private CustomControls.OutlineLabel outlineLabelReal;
         private CustomControls.OutlineLabel outlineLabelPurpose;
+        private System.Windows.Forms.Button button1;
+        private CustomControls.OutlineLabel outlineLabelDeliveryTimes;
     }
 }

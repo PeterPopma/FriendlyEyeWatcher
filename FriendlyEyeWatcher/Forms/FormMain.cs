@@ -36,6 +36,8 @@ namespace FriendlyEyeWatcher.Forms
         string numVotesNo;
         string filename;
         bool obtainImageRecognition;
+        bool obtainPostNL;
+        string deliveryTimes;
 
         Bitmap[] imageFrame = new Bitmap[10];
 
@@ -136,6 +138,15 @@ namespace FriendlyEyeWatcher.Forms
 
         private void OnTimedEventUpdateScreen(object sender, EventArgs eArgs)
         {
+            if (obtainPostNL)
+            {
+                obtainPostNL = false;
+                obtainImageRecognition = true;
+
+                string times = "delivery times: " + new POSTNLClient().getDeliveries("6823LE", "12");
+                times = SplitToLines(times, new char[] { ' ' }, 120);
+                outlineLabelDeliveryTimes.Text = times;
+            }
             if (obtainImageRecognition)
             {
                 obtainImageRecognition = false;
@@ -230,7 +241,8 @@ namespace FriendlyEyeWatcher.Forms
                     labelCurrentFrameNumber.Text = currentFrameNumber.ToString();
                     UpdateImage();
 
-                    obtainImageRecognition = true;     // on next round 
+                    //                    obtainImageRecognition = true;     // on next round 
+                    obtainPostNL = true;
                 }
             }
             pendingRequest = false;
@@ -361,6 +373,13 @@ namespace FriendlyEyeWatcher.Forms
                 ResetFrames();
                 return;
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string times = "delivery times: " + new POSTNLClient().getDeliveries("6823LE", "12");
+            times = SplitToLines(times, new char[] { ' ' }, 120);
+            outlineLabelDeliveryTimes.Text = times;
         }
     }
 }
