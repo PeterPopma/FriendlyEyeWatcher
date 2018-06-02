@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -44,7 +45,7 @@ namespace FriendlyEyeWatcher
             }
             catch (HttpRequestException)
             {
-                MessageBox.Show("Cannot connect to KPN host!");
+                MessageBox.Show("Cannot connect to KPN host for token!");
                 return "";
             }
 
@@ -57,6 +58,8 @@ namespace FriendlyEyeWatcher
             {
                 access_token = match.Value;
             }
+
+            Thread.Sleep(500);
 
             // www.gravityone.nl/uploads/Peter_462414_1.png
             client.DefaultRequestHeaders.Accept.Clear();
@@ -77,7 +80,7 @@ namespace FriendlyEyeWatcher
             }
             catch (HttpRequestException)
             {
-                MessageBox.Show("Cannot connect to KPN host!");
+                MessageBox.Show("Cannot connect to KPN host for IR!");
                 return "";
             }
 

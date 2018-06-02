@@ -24,8 +24,10 @@ namespace FriendlyEyeWatcher
                 new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public string getDeliveries(string postalCode, string housenumber)
+        public string getDeliveries(string postalCodeHousenumber)
         {
+            string postalCode = postalCodeHousenumber.Substring(0, 6);
+            string housenumber = postalCodeHousenumber.Substring(6, postalCodeHousenumber.Length-6);
             string result = "";
             HttpResponseMessage response = null;
 

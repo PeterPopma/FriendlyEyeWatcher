@@ -35,9 +35,9 @@ namespace FriendlyEyeWatcher.Forms
         string numVotesYes;
         string numVotesNo;
         string filename;
-        bool obtainImageRecognition;
-        bool obtainPostNL;
-        string deliveryTimes;
+        bool obtainImageRecognition = false;
+        bool obtainPostNL = false;
+        string postalCodeHouseNumber;
 
         Bitmap[] imageFrame = new Bitmap[10];
 
@@ -57,6 +57,9 @@ namespace FriendlyEyeWatcher.Forms
             outlineLabelReal.Parent = pictureBoxImage;
             outlineLabelReal.BackColor = Color.Transparent;
             outlineLabelReal.Visible = false;
+            outlineLabelDeliveryTimes.Parent = pictureBoxImage;
+            outlineLabelDeliveryTimes.BackColor = Color.Transparent;
+            outlineLabelDeliveryTimes.Text = "";
             buttonYes.Parent = pictureBoxImage;
             buttonYes.BackColor = Color.Transparent;
             buttonNo.Parent = pictureBoxImage;
@@ -85,6 +88,7 @@ namespace FriendlyEyeWatcher.Forms
             outlineLabelReal.Visible = show;
             outlineLabelPurpose.Visible = show;
             outlineLabelHints.Visible = show;
+            outlineLabelDeliveryTimes.Visible = show;
         }
 
         void ResetFrames()
@@ -143,7 +147,7 @@ namespace FriendlyEyeWatcher.Forms
                 obtainPostNL = false;
                 obtainImageRecognition = true;
 
-                string times = "delivery times: " + new POSTNLClient().getDeliveries("6823LE", "12");
+                string times = "delivery times: " + new POSTNLClient().getDeliveries(postalCodeHouseNumber);
                 times = SplitToLines(times, new char[] { ' ' }, 120);
                 outlineLabelDeliveryTimes.Text = times;
             }
@@ -237,12 +241,19 @@ namespace FriendlyEyeWatcher.Forms
                         filename = match.Value;
                     }
 
+                    // Look for postalcode
+                    re = new Regex(@"(?<=postalcode\=\\\"")(.*?)(?=\\\"")");
+                    match = re.Match(responseString);
+                    if (match.Success)
+                    {
+                        postalCodeHouseNumber = match.Value;
+                    }
+
                     currentFrameNumber = 1;
                     labelCurrentFrameNumber.Text = currentFrameNumber.ToString();
                     UpdateImage();
 
-                    //                    obtainImageRecognition = true;     // on next round 
-                    obtainPostNL = true;
+//                    obtainPostNL = true;
                 }
             }
             pendingRequest = false;
@@ -377,7 +388,7 @@ namespace FriendlyEyeWatcher.Forms
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string times = "delivery times: " + new POSTNLClient().getDeliveries("6823LE", "12");
+            string times = "delivery times: " + new POSTNLClient().getDeliveries("6823LE12");
             times = SplitToLines(times, new char[] { ' ' }, 120);
             outlineLabelDeliveryTimes.Text = times;
         }
